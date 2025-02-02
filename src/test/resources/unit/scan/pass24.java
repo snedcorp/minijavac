@@ -1,0 +1,1 @@
+class id {} /* no trailing \r\n */

@@ -1,0 +1,25 @@
+packages:
+  - name: lang
+    classes:
+      - name: String
+      - name: System
+        fields:
+          - name: out
+            type: java/io/PrintStream
+            static: true
+  - name: io
+    classes:
+      - name: PrintStream
+        methods:
+          - name: println
+            type: void
+            params:
+              - boolean
+          - name: println
+            type: void
+            params:
+              - int
+          - name: println
+            type: void
+            params:
+              - float

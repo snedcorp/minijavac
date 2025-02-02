@@ -1,0 +1,5 @@
+class id {
+    void x;
+}
+
+

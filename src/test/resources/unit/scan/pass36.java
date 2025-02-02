@@ -1,0 +1,2 @@
+class id$ {}
+class $id {}

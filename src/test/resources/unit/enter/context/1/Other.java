@@ -1,0 +1,3 @@
+class Other {
+    boolean y;
+}
