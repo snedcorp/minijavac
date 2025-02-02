@@ -1,6 +1,6 @@
 <h1>minijavac</h1>
 
-<a href="https://github.com/snedcorp/minijavac/actions/workflows/build.yml"><img src="https://github.com/snedcorp/minijavac/actions/workflows/build.yml/badge.svg?branch=main" alt="build"></a>
+<a href="https://github.com/snedcorp/minijavac/actions/workflows/build.yaml"><img src="https://github.com/snedcorp/minijavac/actions/workflows/build.yaml/badge.svg?branch=main" alt="build"></a>
 
 `minijavac` is a minimal Java compiler that supports a limited, yet meaningful, subset of the Java language.
 
