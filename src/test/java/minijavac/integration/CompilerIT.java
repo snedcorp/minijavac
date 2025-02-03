@@ -782,4 +782,64 @@ public class CompilerIT {
                 tmpDir
         );
     }
+
+    @Test
+    public void mergeSort(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "MergeSort.java",
+                List.of("MergeSort"),
+                List.of("1", "2", "3", "4", "5", "6", "7", "8"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void mergeSortFloat(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "MergeSortFloat.java",
+                List.of("MergeSortFloat"),
+                List.of("1.1", "2.4", "3.8", "4.3", "5.3", "6.3", "6.4", "7.9", "8.0"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void quickSort(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "QuickSort.java",
+                List.of("QuickSort"),
+                List.of("1", "2", "3", "4", "5", "6", "7", "8"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void quickSortFloat(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "QuickSortFloat.java",
+                List.of("QuickSortFloat"),
+                List.of("1.1", "2.4", "3.8", "4.3", "5.3", "6.3", "6.4", "7.9", "8.0"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void countingSort(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "CountingSort.java",
+                List.of("CountingSort"),
+                List.of("0", "1", "1", "1", "2", "3", "3", "4", "4", "5", "6", "6", "7", "7", "8"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void radixSort(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "RadixSort.java",
+                List.of("RadixSort"),
+                List.of("5", "11", "37", "102", "758", "999", "1101", "2310"),
+                tmpDir
+        );
+    }
 }

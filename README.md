@@ -204,6 +204,10 @@ The following are examples of Java programs that can be successfully compiled by
   - [Bubble Sort](src/test/resources/integration/programs/sort/BubbleSort.java)
   - [Selection Sort](src/test/resources/integration/programs/sort/SelectionSort.java)
   - [Insertion Sort](src/test/resources/integration/programs/sort/InsertionSort.java)
+  - [Merge Sort](src/test/resources/integration/programs/sort/MergeSort.java)
+  - [Quick Sort](src/test/resources/integration/programs/sort/QuickSort.java)
+  - [Counting Sort](src/test/resources/integration/programs/sort/CountingSort.java)
+  - [Radix Sort](src/test/resources/integration/programs/sort/RadixSort.java)
 - Linked List:
   - [Implement Linked List](src/test/resources/integration/programs/linkedlist/LinkedList.java)
   - [Remove From Linked List](src/test/resources/integration/programs/linkedlist/Remove.java)
