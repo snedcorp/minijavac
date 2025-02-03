@@ -14,8 +14,8 @@ class BinarySearch {
         if (right < left) return -1;
         int mid = left + ((right - left) / 2);
         if (target == arr[mid]) return mid;
-        else if (target < arr[mid]) return search(left, mid, target);
-        return search(mid, right, target);
+        else if (target < arr[mid]) return search(left, mid-1, target);
+        return search(mid+1, right, target);
     }
 
     public static void main(String[] args) {

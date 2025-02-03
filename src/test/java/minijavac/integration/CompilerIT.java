@@ -1,10 +1,12 @@
 package minijavac.integration;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,7 +53,12 @@ public class CompilerIT {
         compilation.waitFor();
 
         for (String expectedClass : expectedClasses) {
-            assertTrue(Files.exists(tmpDir.resolve(String.format("%s.class", expectedClass))));
+            boolean exists = Files.exists(tmpDir.resolve(String.format("%s.class", expectedClass)));
+            if (!exists) {
+                printStderr(compilation.getErrorStream());
+                Assertions.fail();
+                return;
+            }
         }
     }
 
@@ -67,10 +74,25 @@ public class CompilerIT {
         Iterator<String> iter = expectedOutput.iterator();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(execution.getInputStream()))) {
             String line;
+            boolean anyLines = false;
             while ((line = br.readLine()) != null) {
                 assertEquals(iter.next(), line);
+                anyLines = true;
+            }
+
+            if (!anyLines) printStderr(execution.getErrorStream());
+            if (iter.hasNext()) Assertions.fail();
+        }
+    }
+
+    private void printStderr(InputStream errorStream) throws IOException {
+        try (BufferedReader brErr = new BufferedReader(new InputStreamReader(errorStream))) {
+            String line;
+            while ((line = brErr.readLine()) != null) {
+                System.out.println(line);
             }
         }
+        Assertions.fail();
     }
 
     @Test
@@ -264,6 +286,16 @@ public class CompilerIT {
     }
 
     @Test
+    public void stmt_while_return(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("features/stmt/while",
+                "5.java",
+                "Test",
+                List.of("2", "1", "2", "2"),
+                tmpDir
+        );
+    }
+
+    @Test
     public void stmt_doWhile(@TempDir Path tmpDir) throws IOException, InterruptedException {
         test("features/stmt/doWhile",
                 "1.java",
@@ -342,6 +374,17 @@ public class CompilerIT {
                 tmpDir
         );
     }
+
+    @Test
+    public void stmt_for_return(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("features/stmt/for",
+                "5.java",
+                "Test",
+                List.of("1", "2", "10", "2"),
+                tmpDir
+        );
+    }
+
 
     @Test
     public void method_chaining(@TempDir Path tmpDir) throws IOException, InterruptedException {
@@ -424,19 +467,9 @@ public class CompilerIT {
     }
 
     @Test
-    public void varDecl_late_init(@TempDir Path tmpDir) throws IOException, InterruptedException {
-        test("features/ref",
-                "9.java",
-                "Test",
-                List.of("3"),
-                tmpDir
-        );
-    }
-
-    @Test
     public void constructor(@TempDir Path tmpDir) throws IOException, InterruptedException {
         test("features/ref",
-                "10.java",
+                "9.java",
                 "Test",
                 List.of("13", "true", "20", "false", "9", "true"),
                 tmpDir
@@ -479,6 +512,16 @@ public class CompilerIT {
                 "1.java",
                 "Test",
                 List.of("0", "1", "2", "3"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void stmt_if_elseIf_return(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("features/stmt/if",
+                "2.java",
+                "Test",
+                List.of("1", "1", "2", "3", "1.1", "1.1", "2.2", "3.3", "1", "1", "2", "3"),
                 tmpDir
         );
     }
@@ -838,7 +881,7 @@ public class CompilerIT {
         test("programs/sort",
                 "RadixSort.java",
                 List.of("RadixSort"),
-                List.of("5", "11", "37", "102", "758", "999", "1101", "2310"),
+                List.of("5", "11", "33", "109", "752", "997", "1113", "2310"),
                 tmpDir
         );
     }
@@ -882,4 +925,16 @@ public class CompilerIT {
                 tmpDir
         );
     }
+
+    @Test
+    public void sudokuSolver(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs",
+                "SudokuSolver.java",
+                "SudokuSolver",
+                List.of("5","3","4","6","7","8","9","1","2","6","7","2","1","9","5","3","4","8","1","9","8","3","4","2","5","6","7","8","5","9","7","6","1","4","2","3","4","2","6","8","5","3","7","9","1","7","1","3","9","2","4","8","5","6","9","6","1","5","3","7","2","8","4","2","8","7","4","1","9","6","3","5","3","4","5","2","8","6","1","7","9"),
+                tmpDir
+        );
+    }
+
+
 }

@@ -163,7 +163,7 @@ public class Context implements Visitor<ContextTraversalState, ConArg, Type> {
         Type valType = stmt.val.visit(this, state, ConArg.NONE);
 
         Declaration refDecl = stmt.ref.getDecl();
-        if (refDecl != null && refDecl.isFinal) { // cannot assign to a variable declared as final
+        if (refDecl != null && refDecl.isFinal && !state.getCurrMethod().isConstructor()) { // cannot assign to a variable declared as final
             String msg;
             if (refDecl instanceof ParameterDecl) {
                 msg = "final parameter %s may not be assigned";

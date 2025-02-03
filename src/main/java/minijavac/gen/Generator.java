@@ -266,15 +266,18 @@ public class Generator implements Visitor<GenTraversalState, GenArg, Object> {
         if (stmt.elseStmt != null) {
             code.enterScope();
             // here if condition is true, so branch past "else"
-            BranchInstruction gotoPastElse = BranchInstruction.of(OpCode._goto);
-            code.addInstruction(gotoPastElse);
+            BranchInstruction gotoPastElse = null;
+            if (!code.getLastInstruction().getOpCode().isReturn()) {
+                gotoPastElse = BranchInstruction.of(OpCode._goto);
+                code.addInstruction(gotoPastElse);
+            }
 
             // if condition is false, branch to "else"
             code.setBranchOffsetAndSeekFrame(cond);
             stmt.elseStmt.visit(this, state, GenArg.NONE); // visit "else" body
 
             // set offset for branch past "else"
-            code.setBranchOffsetAndSeekFrame(gotoPastElse);
+            if (gotoPastElse != null) code.setBranchOffsetAndSeekFrame(gotoPastElse);
             code.exitScope();
         } else { // if condition is false, branch past "if" body
             code.setBranchOffsetAndSeekFrame(cond);
@@ -302,9 +305,11 @@ public class Generator implements Visitor<GenTraversalState, GenArg, Object> {
             code.setBranchOffsets(loopFlowInstructions.continues(), condOffset);
         }
 
-        BranchInstruction gotoCond = BranchInstruction.of(OpCode._goto);
-        code.addInstruction(gotoCond);
-        code.setBranchOffset(gotoCond, condOffset); // end of loop body, branch back to condition
+        if (!code.getLastInstruction().getOpCode().isReturn()) {
+            BranchInstruction gotoCond = BranchInstruction.of(OpCode._goto);
+            code.addInstruction(gotoCond);
+            code.setBranchOffset(gotoCond, condOffset); // end of loop body, branch back to condition
+        }
 
         // break statements branch here, past loop (piggyback on frame seek from cond)
         if (!loopFlowInstructions.breaks().isEmpty()) {
@@ -377,9 +382,9 @@ public class Generator implements Visitor<GenTraversalState, GenArg, Object> {
     public Object visitForStmt(ForStmt stmt, GenTraversalState state, GenArg arg) {
         CodeAttribute code = state.getCode();
 
+        code.enterScope(); // enter initializing scope
+        stmt.initStmt.visit(this, state, GenArg.NONE); // visit initializing statement
         code.enterLoopScope();
-        // visit initializing statement
-        stmt.initStmt.visit(this, state, GenArg.NONE);
 
         // add frame at condition's offset, will be target for later branching instructions
         int condOffset = code.addFrame();
@@ -390,21 +395,32 @@ public class Generator implements Visitor<GenTraversalState, GenArg, Object> {
 
         stmt.body.visit(this, state, GenArg.NONE); // visit body
 
-        // add frame if continues exist (becomes branching target), get current offset regardless
-        int updateOffset = !code.peekLoopFlow().continues().isEmpty() ? code.addFrame() : code.getOffset();
-        stmt.updateStmt.visit(this, state, GenArg.NONE); // visit update statement
-
         CodeAttribute.LoopFlowInstructions loopFlowInstructions = code.exitLoopScope();
+
+        boolean haveContinues = !loopFlowInstructions.continues().isEmpty();
+        boolean lastReturn = code.getLastInstruction().getOpCode().isReturn();
+
+        // add frame if continues exist (becomes branching target), get current offset regardless
+        int updateOffset = haveContinues ? code.addFrame() : code.getOffset();
+
+        if (!lastReturn || haveContinues) {
+            stmt.updateStmt.visit(this, state, GenArg.NONE); // visit update statement
+        }
+
         // continue statements branch to the update statement
         for (BranchInstruction cont : loopFlowInstructions.continues()) {
             code.setBranchOffset(cont, updateOffset);
         }
 
-        BranchInstruction gotoCond = BranchInstruction.of(OpCode._goto);
-        code.addInstruction(gotoCond);
-        code.setBranchOffset(gotoCond, condOffset); // end of loop body, branch back to condition
+        if (!lastReturn || haveContinues) {
+            BranchInstruction gotoCond = BranchInstruction.of(OpCode._goto);
+            code.addInstruction(gotoCond);
+            code.setBranchOffset(gotoCond, condOffset); // end of loop body, branch back to condition
+        }
 
-        // break statements branch here, past loop (piggyback on frame seek from cond)
+        code.exitScope(); // exit initializing scope
+
+        // break statements branch here, past loop (piggyback on frame seek from cond below)
         if (!loopFlowInstructions.breaks().isEmpty()) {
             code.setBranchOffsets(loopFlowInstructions.breaks());
         }

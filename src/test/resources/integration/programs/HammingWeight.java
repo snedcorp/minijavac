@@ -1,7 +1,7 @@
 class HammingWeight {
 
     int getWeight(int n) {
-        int numOnes;
+        int numOnes = 0;
         while (n > 0) {
             if (n % 2 == 1) numOnes++;
             n >>= 1;

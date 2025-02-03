@@ -1264,4 +1264,9 @@ public enum OpCode {
     public StackTransformation getTransformation() {
         return transformation;
     }
+
+    public boolean isReturn() {
+        return this == OpCode.ireturn || this == OpCode.freturn ||
+                this == OpCode.areturn || this == OpCode._return;
+    }
 }

@@ -1,9 +1,10 @@
 class Reverse {
 
     Node reverse(Node head) {
-        if (head == null) return head;
+        if (head.next == null) return head;
         Node toRight = reverse(head.next);
         head.next.next = head;
+        head.next = null;
         return toRight;
     }
 

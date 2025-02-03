@@ -372,7 +372,7 @@ public class StackMapTableAttribute extends Attribute {
         for (int i=localsStack.size()-1; i>=0; i--) {
             List<String> scope = localsStack.get(i);
             for (int j=scope.size()-1; j>=0; j--) {
-                locals.add(resolveVariable(scope.get(j)));
+                locals.add(0, resolveVariable(scope.get(j)));
                 if (locals.size() == n) {
                     return locals;
                 }
