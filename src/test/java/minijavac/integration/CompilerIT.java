@@ -842,4 +842,44 @@ public class CompilerIT {
                 tmpDir
         );
     }
+
+    @Test
+    public void bucketSort(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "BucketSort.java",
+                List.of("BucketSort", "Node"),
+                List.of("3", "11", "13", "22", "25", "30", "42", "49", "56", "61", "65", "74", "77", "84", "89", "91", "100"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void heapSort(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "HeapSort.java",
+                List.of("HeapSort"),
+                List.of("1", "2", "3", "4", "5", "6", "7", "8"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void validSudoku(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs",
+                "ValidSudoku.java",
+                List.of("ValidSudoku"),
+                List.of("true", "false"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void lowestCommonAncestor(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/tree",
+                "LowestCommonAncestor.java",
+                List.of("LowestCommonAncestor", "TreeNode"),
+                List.of("3", "5", "1"),
+                tmpDir
+        );
+    }
 }

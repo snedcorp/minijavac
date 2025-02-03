@@ -200,6 +200,7 @@ The following are examples of Java programs that can be successfully compiled by
 - [Implement Queue](src/test/resources/integration/programs/Queue.java)
 - [Implement Min-Heap](src/test/resources/integration/programs/MinHeap.java)
 - [Kth Largest Element](src/test/resources/integration/programs/KthLargestElement.java)
+- [Valid Sudoku](src/test/resources/integration/programs/ValidSudoku.java)
 - Sorting:
   - [Bubble Sort](src/test/resources/integration/programs/sort/BubbleSort.java)
   - [Selection Sort](src/test/resources/integration/programs/sort/SelectionSort.java)
@@ -208,6 +209,7 @@ The following are examples of Java programs that can be successfully compiled by
   - [Quick Sort](src/test/resources/integration/programs/sort/QuickSort.java)
   - [Counting Sort](src/test/resources/integration/programs/sort/CountingSort.java)
   - [Radix Sort](src/test/resources/integration/programs/sort/RadixSort.java)
+  - [Bucket Sort](src/test/resources/integration/programs/sort/BucketSort.java)
 - Linked List:
   - [Implement Linked List](src/test/resources/integration/programs/linkedlist/LinkedList.java)
   - [Remove From Linked List](src/test/resources/integration/programs/linkedlist/Remove.java)
@@ -221,6 +223,7 @@ The following are examples of Java programs that can be successfully compiled by
   - [Same Tree](src/test/resources/integration/programs/tree/SameTree.java)
   - [Max Depth](src/test/resources/integration/programs/tree/MaxDepth.java)
   - [Path Sum](src/test/resources/integration/programs/tree/PathSum.java)
+  - [Lowest Common Ancestor](src/test/resources/integration/programs/tree/LowestCommonAncestor.java)
   - [Validate Binary Search Tree](src/test/resources/integration/programs/tree/ValidateBST.java)
 
 ## Implementation
