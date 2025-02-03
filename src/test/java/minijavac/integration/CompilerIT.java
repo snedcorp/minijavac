@@ -712,4 +712,74 @@ public class CompilerIT {
                 tmpDir
         );
     }
+
+    @Test
+    public void houseRobber(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs",
+                "HouseRobber.java",
+                List.of("HouseRobber"),
+                List.of("4", "4", "12", "12"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void minHeap(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs",
+                "MinHeap.java",
+                List.of("MinHeap"),
+                List.of("0", "true", "1", "3", "true", "3", "true", "2", "true", "2", "true", "1", "5", "false", "1", "2", "3", "5", "4", "1", "4", "2", "4", "3", "5", "2", "3", "4", "5", "3", "4", "5", "4", "5", "5", "0"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void kthLargestElement(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs",
+                "KthLargestElement.java",
+                List.of("KthLargestElement", "MinHeap"),
+                List.of("6", "5", "4", "3", "2", "1"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void selectionSort(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "SelectionSort.java",
+                List.of("SelectionSort"),
+                List.of("1", "2", "3", "4", "5", "6", "7", "8"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void selectionSortFloat(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "SelectionSortFloat.java",
+                List.of("SelectionSortFloat"),
+                List.of("1.1", "2.4", "3.8", "4.3", "5.3", "6.3", "6.4", "7.9", "8.0"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void insertionSort(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "InsertionSort.java",
+                List.of("InsertionSort"),
+                List.of("1", "2", "3", "4", "5", "6", "7", "8"),
+                tmpDir
+        );
+    }
+
+    @Test
+    public void insertionSortFloat(@TempDir Path tmpDir) throws IOException, InterruptedException {
+        test("programs/sort",
+                "InsertionSortFloat.java",
+                List.of("InsertionSortFloat"),
+                List.of("1.1", "2.4", "3.8", "4.3", "5.3", "6.3", "6.4", "7.9", "8.0"),
+                tmpDir
+        );
+    }
 }

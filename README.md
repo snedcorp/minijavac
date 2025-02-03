@@ -198,7 +198,12 @@ The following are examples of Java programs that can be successfully compiled by
 - [Square Root](src/test/resources/integration/programs/Sqrt.java)
 - [Reverse Integer](src/test/resources/integration/programs/ReverseInteger.java)
 - [Implement Queue](src/test/resources/integration/programs/Queue.java)
-- [Bubble Sort](src/test/resources/integration/programs/sort/BubbleSort.java)
+- [Implement Min-Heap](src/test/resources/integration/programs/MinHeap.java)
+- [Kth Largest Element](src/test/resources/integration/programs/KthLargestElement.java)
+- Sorting:
+  - [Bubble Sort](src/test/resources/integration/programs/sort/BubbleSort.java)
+  - [Selection Sort](src/test/resources/integration/programs/sort/SelectionSort.java)
+  - [Insertion Sort](src/test/resources/integration/programs/sort/InsertionSort.java)
 - Linked List:
   - [Implement Linked List](src/test/resources/integration/programs/linkedlist/LinkedList.java)
   - [Remove From Linked List](src/test/resources/integration/programs/linkedlist/Remove.java)
