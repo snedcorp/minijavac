@@ -598,10 +598,8 @@ operands and local variables is then added for the appropriate offset.
 [^8]: Thereby requiring each supported OpCode to be mapped to a corresponding StackTransformation - for each instruction, the
 StackMapTableAttribute has to know exactly how to manipulate its operand stack to reflect the instruction's execution.
 
-Note that the only reason that this approach works[^9] is the absence of more advanced features like type conversions and 
+Note that the only reason that this approach works is the absence of more advanced features like type conversions and 
 polymorphism - at that point, data flow analysis capabilities are likely needed.
-
-[^9]: Probably not completely correctly, especially when dealing with uninitialized variables.
 
 ### Serialization
 
