@@ -56,5 +56,6 @@ class BFS {
 
     public static void main(String[] args) {
         testOne();
+        testTwo();
     }
 }

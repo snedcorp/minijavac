@@ -1674,6 +1674,70 @@ public class GeneratorTest {
     }
 
     @Test
+    public void stmt_if_elseIf_return() {
+        JavaClass res = test("stmt/if/4.java");
+        assert res != null;
+        assertEquals(5, res.getMethods().length);
+
+        List<String> instructions = List.of(
+                "iload_1",
+                "ifeq -> 6", // 1
+                "iconst_1", // 4
+                "ireturn", // 5
+                "iload_2", // 6
+                "ifeq -> 12", // 7
+                "iconst_2", // 10
+                "ireturn", // 11
+                "iconst_3", // 12
+                "ireturn" // 13
+        );
+
+        assertInstructions(res.getMethods()[1].getCode(), res.getConstantPool(), instructions);
+
+        List<String> floatInstructions = List.of(
+                "iload_1",
+                "ifeq -> 7", // 1
+                "ldc 1.1", // 4
+                "freturn", // 6
+                "iload_2", // 7
+                "ifeq -> 14", // 8
+                "ldc 2.2", // 11
+                "freturn", // 13
+                "ldc 3.3", // 14
+                "freturn" // 16
+        );
+
+        assertInstructions(res.getMethods()[2].getCode(), res.getConstantPool(), floatInstructions);
+
+        List<String> objInstructions = List.of(
+                "iload_1",
+                "ifeq -> 6", // 1
+                "aload_3", // 4
+                "areturn", // 5
+                "iload_2", // 6
+                "ifeq -> 13", // 7
+                "aload 4", // 10
+                "areturn", // 12
+                "aload 5", // 13
+                "areturn" // 15
+        );
+
+        assertInstructions(res.getMethods()[3].getCode(), res.getConstantPool(), objInstructions);
+
+        List<String> voidInstructions = List.of(
+                "iload_1",
+                "ifeq -> 5", // 1
+                "return", // 4
+                "iload_2", // 5
+                "ifeq -> 10", // 6
+                "return", // 9
+                "return" // 10
+        );
+
+        assertInstructions(res.getMethods()[4].getCode(), res.getConstantPool(), voidInstructions);
+    }
+
+    @Test
     public void stmt_while() {
         JavaClass res = test("stmt/while/1.java");
         assert res != null;
@@ -1726,6 +1790,27 @@ public class GeneratorTest {
                 "goto -> 23", // 17
                 "goto -> 0", // 20
                 "return" // 23
+        );
+
+        assertInstructions(res.getMethods()[1].getCode(), res.getConstantPool(), instructions);
+    }
+
+    @Test
+    public void stmt_while_return() {
+        JavaClass res = test("stmt/while/4.java");
+        assert res != null;
+        assertEquals(2, res.getMethods().length);
+
+        List<String> instructions = List.of(
+                "iload_1", // 0
+                "ifeq -> 13", // 1
+                "iload_2", // 4
+                "ifeq -> 11", // 5
+                "goto -> 13", // 8
+                "iconst_1", // 11
+                "ireturn", // 12
+                "iconst_2", // 13
+                "ireturn" // 14
         );
 
         assertInstructions(res.getMethods()[1].getCode(), res.getConstantPool(), instructions);
@@ -1942,6 +2027,65 @@ public class GeneratorTest {
                 )
         );
         stackMapTableAsserter.assertIt((StackMap) res.getMethods()[1].getCode().getAttributes()[0]);
+    }
+
+    @Test
+    public void stmt_for_return() {
+        JavaClass res = test("stmt/for/4.java");
+        assert res != null;
+        assertEquals(3, res.getMethods().length);
+
+        List<String> instructions = List.of(
+                "iconst_0",
+                "istore_3", // 1
+                "iconst_0", // 2
+                "istore 4", // 3
+                "iload 4",  // 5
+                "iload_1",  // 7
+                "if_icmpge -> 15", // 8
+                "iconst_1", // 11
+                "goto -> 16", // 12
+                "iconst_0", // 15
+                "ifeq -> 34", // 16
+                "iinc 3 1", // 19
+                "iload_2",  // 22
+                "ifeq -> 29", // 23
+                "goto -> 34",  // 26
+                "iinc 3 1", // 29
+                "iload_3", // 32
+                "ireturn",  // 33
+                "iload_3", // 34
+                "ireturn"   // 35
+        );
+
+        assertInstructions(res.getMethods()[1].getCode(), res.getConstantPool(), instructions);
+
+        List<String> contInstructions = List.of(
+                "iconst_0",
+                "istore_3", // 1
+                "iconst_0", // 2
+                "istore 4", // 3
+                "iload 4",  // 5
+                "iload_1",  // 7
+                "if_icmpge -> 15", // 8
+                "iconst_1", // 11
+                "goto -> 16", // 12
+                "iconst_0", // 15
+                "ifeq -> 40", // 16
+                "iinc 3 1", // 19
+                "iload_2",  // 22
+                "ifeq -> 29", // 23
+                "goto -> 34",  // 26
+                "iinc 3 1", // 29
+                "iload_3", // 32
+                "ireturn",  // 33
+                "iinc 4 1", // 34
+                "goto -> 5", // 37
+                "iload_3", // 40
+                "ireturn"   // 41
+        );
+
+        assertInstructions(res.getMethods()[2].getCode(), res.getConstantPool(), contInstructions);
     }
 
     @Test
@@ -4869,6 +5013,115 @@ public class GeneratorTest {
                                         stmIntType()
                                 )
                         )
+                )
+        );
+        stackMapTableAsserter.assertIt((StackMap) res.getMethods()[1].getCode().getAttributes()[0]);
+    }
+
+    @Test
+    public void stackmapframe_for_append_across_scopes() {
+        JavaClass res = test("stackmapframe/for/1.java");
+        assert res != null;
+        assertEquals(2, res.getMethods().length);
+
+        Asserter<StackMap> stackMapTableAsserter = stmTable(
+                List.of(
+                        stmEntry(
+                                253,
+                                10,
+                                List.of(
+                                        stmObjectType("[I"),
+                                        stmIntType()
+                                )
+                        ),
+                        stmEntry(8),
+                        stmEntry(
+                                64,
+                                stmIntType()
+                        ),
+                        stmEntry(
+                                253,
+                                15,
+                                List.of(
+                                        stmObjectType("[I"),
+                                        stmIntType()
+                                )
+                        ),
+                        stmEntry(11),
+                        stmEntry(
+                                64,
+                                stmIntType()
+                        ),
+                        stmEntry(
+                                250,
+                                24
+                        ),
+                        stmEntry(
+                                249,
+                                15
+                        )
+                )
+        );
+        stackMapTableAsserter.assertIt((StackMap) res.getMethods()[1].getCode().getAttributes()[0]);
+    }
+
+    @Test
+    public void stackmapframe_for_continue_scope() {
+        JavaClass res = test("stackmapframe/for/2.java");
+        assert res != null;
+        assertEquals(4, res.getMethods().length);
+
+        List<String> instructions = List.of(
+                "iconst_0",
+                "istore_2", // 1
+                "iconst_0", // 2
+                "istore_3", // 3
+                "iload_3", // 4
+                "iload_1", // 5
+                "if_icmpge -> 13", // 6
+                "iconst_1", // 9
+                "goto -> 14", // 10
+                "iconst_0", // 13
+                "ifeq -> 46", // 14
+                "aload_0", // 17
+                "iload_3", // 18
+                "invokevirtual Test/isValid(I)Z", // 19
+                "ifeq -> 28", // 22
+                "goto -> 40", // 25
+                "aload_0", // 28
+                "iload_3", // 29
+                "invokevirtual Test/getErr(I)I", // 30
+                "istore 4", // 33
+                "iload_2", // 35
+                "iload 4", // 36
+                "iadd", // 38
+                "istore_2", // 39
+                "iinc 3 1", // 40
+                "goto -> 4", // 43
+                "iload_2", // 46
+                "ireturn" // 47
+        );
+
+        assertInstructions(res.getMethods()[1].getCode(), res.getConstantPool(), instructions);
+
+        Asserter<StackMap> stackMapTableAsserter = stmTable(
+                List.of(
+                    stmEntry(
+                            253,
+                            4,
+                            List.of(stmIntType(), stmIntType())
+                    ),
+                    stmEntry(8),
+                    stmEntry(
+                            64,
+                            stmIntType()
+                    ),
+                    stmEntry(13),
+                    stmEntry(11),
+                    stmEntry(
+                            250,
+                            5
+                    )
                 )
         );
         stackMapTableAsserter.assertIt((StackMap) res.getMethods()[1].getCode().getAttributes()[0]);

@@ -56,11 +56,14 @@ class RadixSort {
         if (power == 0) return 1;
         if (power == 1) return num;
 
-        return num << power-1;
+        for (int i=2; i<=power; i++) {
+            num *= 10;
+        }
+        return num;
     }
 
     public static void main(String[] args) {
-        int[] arr = new int[]{102, 2310, 5, 758, 37, 1101, 11, 999};
+        int[] arr = new int[]{109, 2310, 5, 752, 33, 1113, 11, 997};
 
         RadixSort sorter = new RadixSort(arr);
         int[] res = sorter.sort();

@@ -492,6 +492,13 @@ public class IdCheckerTest {
     }
 
     @Test
+    public void fail_assignStmt_final_fine_in_constructor() {
+        String file = "fail58.java";
+        List<CompileError> errs = fail(file, 1);
+        assertErr(errs.get(0), isFile(file), 10, 12, "cannot assign a value to final variable val");
+    }
+
+    @Test
     public void fail_duplicateConstructorSignatures() {
         String file = "constructor/fail1.java";
         List<CompileError> errs = fail(file, 2);

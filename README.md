@@ -155,7 +155,10 @@ See [here](#i-usage) for usage examples.
 
 ## Limitations
 
-No support (yet) for:
+### Language
+
+No support (yet) for the following language features:
+ - Uninitialized local variable declarations
  - Immediate dereferencing of new object expressions
  - Field declarations with initialization
  - Type conversions
@@ -184,6 +187,19 @@ No support (yet) for:
    - Records
    - etc.
 
+### Compiler
+
+No support (yet) for the following compiler features:
+ - `LineNumberAttribute` (for debugging)
+ - Specify multiple source paths
+ - Data flow analysis
+ - Concurrent processing
+ - Optimizations:
+   - Peephole optimization
+   - Compile time evaluation
+   - Loop unrolling
+   - etc.
+
 [^4]: Technically, references to the String type are allowed, to enable the main method - but that's it.
 
 ## Examples
@@ -201,6 +217,7 @@ The following are examples of Java programs that can be successfully compiled by
 - [Implement Min-Heap](src/test/resources/integration/programs/MinHeap.java)
 - [Kth Largest Element](src/test/resources/integration/programs/KthLargestElement.java)
 - [Valid Sudoku](src/test/resources/integration/programs/ValidSudoku.java)
+- [Sudoku Solver](src/test/resources/integration/programs/SudokuSolver.java)
 - Sorting:
   - [Bubble Sort](src/test/resources/integration/programs/sort/BubbleSort.java)
   - [Selection Sort](src/test/resources/integration/programs/sort/SelectionSort.java)
@@ -210,6 +227,7 @@ The following are examples of Java programs that can be successfully compiled by
   - [Counting Sort](src/test/resources/integration/programs/sort/CountingSort.java)
   - [Radix Sort](src/test/resources/integration/programs/sort/RadixSort.java)
   - [Bucket Sort](src/test/resources/integration/programs/sort/BucketSort.java)
+  - [Heap Sort](src/test/resources/integration/programs/sort/HeapSort.java)
 - Linked List:
   - [Implement Linked List](src/test/resources/integration/programs/linkedlist/LinkedList.java)
   - [Remove From Linked List](src/test/resources/integration/programs/linkedlist/Remove.java)
