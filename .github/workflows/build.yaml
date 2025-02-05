@@ -16,5 +16,17 @@ jobs:
         with:
           java-version: '17'
           java-distribution: 'temurin'
-      - name: Maven verify
+      - name: maven verify
         run: mvn -B verify
+      - name: publish unit tests
+        uses: mikepenz/action-junit-report@v5
+        with:
+          annotate_only: true
+          check_name: Unit tests
+          report_paths: '**/target/surefire-reports/TEST-*.xml'
+      - name: publish integration tests
+        uses: mikepenz/action-junit-report@v5
+        with:
+          annotate_only: true
+          check_name: Integration tests
+          report_paths: '**/target/failsafe-reports/TEST-*.xml'
