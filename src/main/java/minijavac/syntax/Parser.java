@@ -8,7 +8,9 @@ import minijavac.syntax.err.ExpectedParseError;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Recursive descent parser that performs syntactic analysis on scanned tokens to construct an {@link AST} of the
@@ -83,29 +85,27 @@ public class Parser {
     private Declaration parseDeclaration(String className) throws CompileError, IOException {
         Position pos = token.pos;
 
-        Access access = switch (token.kind) {
-            case PRIVATE -> {
-                accept();
-                yield Access.PRIVATE;
-            }
-            case PUBLIC -> {
-                accept();
-                yield Access.PUBLIC;
-            }
-            default -> Access.PACKAGE_PRIVATE;
-        };
+        Set<TokenKind> modifiers = new HashSet<>();
 
-        boolean isStatic = false;
-        if (token.kind == TokenKind.STATIC) {
+        while (token.kind.isModifier()) {
+            if (modifiers.contains(token.kind)) {
+                listener.err(new CompileError(token.pos, "repeated modifier"));
+            } else if ((token.kind == TokenKind.PRIVATE && modifiers.contains(TokenKind.PUBLIC)) ||
+                            (token.kind == TokenKind.PUBLIC && modifiers.contains(TokenKind.PRIVATE))) {
+                listener.err(new CompileError(token.pos, "illegal combination of modifiers: public and private"));
+            } else {
+                modifiers.add(token.kind);
+            }
             accept();
-            isStatic = true;
         }
 
-        boolean isFinal = false;
-        if (token.kind == TokenKind.FINAL) {
-            accept();
-            isFinal = true;
-        }
+        Access access;
+        if (modifiers.contains(TokenKind.PRIVATE)) access = Access.PRIVATE;
+        else if (modifiers.contains(TokenKind.PUBLIC)) access = Access.PUBLIC;
+        else access = Access.PACKAGE_PRIVATE;
+
+        boolean isStatic = modifiers.contains(TokenKind.STATIC);
+        boolean isFinal = modifiers.contains(TokenKind.FINAL);
 
         if (token.kind == TokenKind.VOID) {
             Type voidType = new BaseType(TypeKind.VOID, token.pos);

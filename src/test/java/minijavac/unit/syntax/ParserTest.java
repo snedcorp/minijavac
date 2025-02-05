@@ -126,6 +126,27 @@ public class ParserTest {
     }
 
     @Test
+    public void fail_method_repeated_modifier() {
+        String file = "method_decl/fail2.java";
+        List<CompileError> errs = fail(file, 5);
+        assertErr(errs.get(0), isFile(file), 2, 19, "repeated modifier");
+        assertErr(errs.get(1), isFile(file), 4, 12, "repeated modifier");
+        assertErr(errs.get(2), isFile(file), 6, 17, "repeated modifier");
+        assertErr(errs.get(3), isFile(file), 6, 31, "repeated modifier");
+        assertErr(errs.get(4), isFile(file), 8, 17, "repeated modifier");
+    }
+
+    @Test
+    public void fail_method_illegal_combination_modifiers() {
+        String file = "method_decl/fail3.java";
+        List<CompileError> errs = fail(file, 4);
+        assertErr(errs.get(0), isFile(file), 2, 11, "illegal combination of modifiers: public and private");
+        assertErr(errs.get(1), isFile(file), 4, 18, "illegal combination of modifiers: public and private");
+        assertErr(errs.get(2), isFile(file), 6, 11, "illegal combination of modifiers: public and private");
+        assertErr(errs.get(3), isFile(file), 8, 12, "illegal combination of modifiers: public and private");
+    }
+
+    @Test
     public void fail_assignInBinop() {
         String file = "expr/binop/fail1.java";
         List<CompileError> errs = fail(file, 1);
@@ -151,17 +172,24 @@ public class ParserTest {
     }
 
     @Test
-    public void fail_staticBeforeVisibility() {
+    public void fail_field_repeated_modifier() {
         String file = "field_decl/fail1.java";
-        List<CompileError> errs = fail(file, 1);
-        assertParseErr(errs.get(0), TokenKind.PRIVATE, isFile(file), 2, 11, "illegal start of type");
+        List<CompileError> errs = fail(file, 5);
+        assertErr(errs.get(0), isFile(file), 2, 19, "repeated modifier");
+        assertErr(errs.get(1), isFile(file), 3, 12, "repeated modifier");
+        assertErr(errs.get(2), isFile(file), 4, 17, "repeated modifier");
+        assertErr(errs.get(3), isFile(file), 4, 31, "repeated modifier");
+        assertErr(errs.get(4), isFile(file), 5, 17, "repeated modifier");
     }
 
     @Test
-    public void fail_bothVisibilities() {
+    public void fail_field_illegal_combination_modifiers() {
         String file = "field_decl/fail2.java";
-        List<CompileError> errs = fail(file, 1);
-        assertParseErr(errs.get(0), TokenKind.PRIVATE, isFile(file), 2, 11, "illegal start of type");
+        List<CompileError> errs = fail(file, 4);
+        assertErr(errs.get(0), isFile(file), 2, 11, "illegal combination of modifiers: public and private");
+        assertErr(errs.get(1), isFile(file), 3, 18, "illegal combination of modifiers: public and private");
+        assertErr(errs.get(2), isFile(file), 4, 11, "illegal combination of modifiers: public and private");
+        assertErr(errs.get(3), isFile(file), 5, 12, "illegal combination of modifiers: public and private");
     }
 
     @Test
@@ -560,12 +588,12 @@ public class ParserTest {
 
         classes(classDecls, List.of("Test", "Other"));
 
-        Asserter<MethodDecl> main = method(Access.PUBLIC, true, voidType(), "main",
+        Asserter<MethodDecl> main = method(Access.PUBLIC, true, false, voidType(), "main",
                 List.of(param(arrayType(classType("String"), 1), "args")), null);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
 
-        Asserter<FieldDecl> a01 = field(Access.PACKAGE_PRIVATE, false, intType(), "A_01");
+        Asserter<FieldDecl> a01 = field(Access.PACKAGE_PRIVATE, false, false, intType(), "A_01");
         clazz(classDecls.get(1), "Other", List.of(a01), null);
     }
 
@@ -583,7 +611,7 @@ public class ParserTest {
                 assignStmt(idRef("FOR"), refExpr(idRef("RETURN")))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         Asserter<Statement> blockStmt = blockStmt(List.of(assignStmt(idRef("else1"),
                 binop(refExpr(idRef("iF")), TokenKind.EQ, refExpr(idRef("Then"))))));
@@ -601,7 +629,7 @@ public class ParserTest {
                 ifStmt
         );
 
-        Asserter<MethodDecl> decl = method(Access.PUBLIC, false, intType(), "declare", null, declareStmts);
+        Asserter<MethodDecl> decl = method(Access.PUBLIC, false, false, intType(), "declare", null, declareStmts);
 
         clazz(classDecls.get(0), "Keywords", null, List.of(p, decl));
     }
@@ -616,7 +644,7 @@ public class ParserTest {
         Asserter<Statement> varDeclStmt = varDeclStmt(classType("SecondSubClass"),
                 "newobj", newObjectExpr("SecondSubClass", null));
 
-        Asserter<MethodDecl> main = method(Access.PUBLIC, true, voidType(), "main",
+        Asserter<MethodDecl> main = method(Access.PUBLIC, true, false, voidType(), "main",
                 List.of(param(arrayType(classType("String"), 1), "args")), List.of(varDeclStmt));
 
         clazz(classDecls.get(0), "MainClass", null, List.of(main));
@@ -632,7 +660,7 @@ public class ParserTest {
         Asserter<Statement> varDeclStmt = varDeclStmt(arrayType(intType(), 1), "newarr",
                 newArrayExpr(intType(), List.of(intLit(20))));
 
-        Asserter<MethodDecl> bar = method(Access.PACKAGE_PRIVATE, false, voidType(), "bar",
+        Asserter<MethodDecl> bar = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "bar",
                 null, List.of(varDeclStmt));
 
         clazz(classDecls.get(0), "Foo", null, List.of(bar));
@@ -648,10 +676,50 @@ public class ParserTest {
         Asserter<Statement> varDeclStmt = varDeclStmt(arrayType(boolType(), 1), "newarr",
                 newArrayExpr(boolType(), List.of(intLit(20))));
 
-        Asserter<MethodDecl> bar = method(Access.PACKAGE_PRIVATE, false, voidType(), "bar",
+        Asserter<MethodDecl> bar = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "bar",
                 null, List.of(varDeclStmt));
 
         clazz(classDecls.get(0), "Foo", null, List.of(bar));
+    }
+
+    @Test
+    public void pass_fieldDecls() {
+        String file = "field_decl/pass1.java";
+        List<ClassDecl> classDecls = pass(file);
+
+        classes(classDecls, List.of("Test"));
+
+        List<Asserter<FieldDecl>> fields = List.of(
+                field(Access.PUBLIC, false, false, intType(), "x"),
+                field(Access.PRIVATE, false, false, intType(), "x"),
+                field(Access.PACKAGE_PRIVATE, false, false, intType(), "x"),
+                field(Access.PACKAGE_PRIVATE, true, false, intType(), "x"),
+                field(Access.PACKAGE_PRIVATE, false, true, intType(), "x"),
+                field(Access.PACKAGE_PRIVATE, true, true, intType(), "x"),
+                field(Access.PACKAGE_PRIVATE, true, true, intType(), "x"),
+                field(Access.PUBLIC, true, false, intType(), "x"),
+                field(Access.PUBLIC, true, false, intType(), "x"),
+                field(Access.PRIVATE, true, false, intType(), "x"),
+                field(Access.PRIVATE, true, false, intType(), "x"),
+                field(Access.PUBLIC, false, true, intType(), "x"),
+                field(Access.PUBLIC, false, true, intType(), "x"),
+                field(Access.PRIVATE, false, true, intType(), "x"),
+                field(Access.PRIVATE, false, true, intType(), "x"),
+                field(Access.PUBLIC, true, true, intType(), "x"),
+                field(Access.PUBLIC, true, true, intType(), "x"),
+                field(Access.PUBLIC, true, true, intType(), "x"),
+                field(Access.PUBLIC, true, true, intType(), "x"),
+                field(Access.PUBLIC, true, true, intType(), "x"),
+                field(Access.PUBLIC, true, true, intType(), "x"),
+                field(Access.PRIVATE, true, true, intType(), "x"),
+                field(Access.PRIVATE, true, true, intType(), "x"),
+                field(Access.PRIVATE, true, true, intType(), "x"),
+                field(Access.PRIVATE, true, true, intType(), "x"),
+                field(Access.PRIVATE, true, true, intType(), "x"),
+                field(Access.PRIVATE, true, true, intType(), "x")
+        );
+
+        clazz(classDecls.get(0), "Test", fields, null);
     }
 
     @Test
@@ -661,29 +729,29 @@ public class ParserTest {
 
         classes(classDecls, List.of("MainClass", "SuperClass"));
 
-        Asserter<MethodDecl> main = method(Access.PUBLIC, true, voidType(), "main",
+        Asserter<MethodDecl> main = method(Access.PUBLIC, true, false, voidType(), "main",
                 List.of(param(arrayType(classType("String"), 1), "args")), null);
 
         clazz(classDecls.get(0), "MainClass", null, List.of(main));
 
         Asserter<Statement> assignStmt = assignStmt(idRef("integer"), refExpr(idRef("worth")));
 
-        Asserter<MethodDecl> setWorth = method(Access.PUBLIC, false, voidType(), "setWorth",
+        Asserter<MethodDecl> setWorth = method(Access.PUBLIC, false, false, voidType(), "setWorth",
                 List.of(param(intType(), "worth")), List.of(assignStmt));
 
         Asserter<Statement> returnStmt = returnStmt(refExpr(qRef(thisRef(), "integer")));
 
-        Asserter<MethodDecl> getWorth = method(Access.PUBLIC, false, intType(), "getWorth",
+        Asserter<MethodDecl> getWorth = method(Access.PUBLIC, false, false, intType(), "getWorth",
                 null, List.of(returnStmt));
 
         Asserter<Statement> setTruthAssign = assignStmt(idRef("bool"), refExpr(idRef("truth")));
 
-        Asserter<MethodDecl> setTruth = method(Access.PUBLIC, false, voidType(), "setTruth",
+        Asserter<MethodDecl> setTruth = method(Access.PUBLIC, false, false,  voidType(), "setTruth",
                 List.of(param(boolType(), "truth")), List.of(setTruthAssign));
 
         Asserter<Statement> getTruthReturn = returnStmt(refExpr(qRef(thisRef(), "bool")));
 
-        Asserter<MethodDecl> getTruth = method(Access.PUBLIC, false, intType(), "getTruth",
+        Asserter<MethodDecl> getTruth = method(Access.PUBLIC, false, false, intType(), "getTruth",
                 null, List.of(getTruthReturn));
 
         clazz(classDecls.get(1), "SuperClass", null, List.of(setWorth, getWorth, setTruth, getTruth));
@@ -699,7 +767,7 @@ public class ParserTest {
         Asserter<Statement> varDeclStmt = varDeclStmt(classType("SecondSubClass"),
                 "newobj", newObjectExpr("SecondSubClass", null));
 
-        Asserter<MethodDecl> main = method(Access.PUBLIC, true, voidType(), "main",
+        Asserter<MethodDecl> main = method(Access.PUBLIC, true, false, voidType(), "main",
                 List.of(param(arrayType(classType("String"), 1), "args")), List.of(varDeclStmt));
 
         clazz(classDecls.get(0), "MainClass", null, List.of(main));
@@ -742,7 +810,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> fillup = method(Access.PRIVATE, false, voidType(), "fillup", fillupParams,
+        Asserter<MethodDecl> fillup = method(Access.PRIVATE, false, false, voidType(), "fillup", fillupParams,
                 fillupStmts);
 
         clazz(classDecls.get(1), "SuperClass", null, List.of(fillup));
@@ -768,7 +836,7 @@ public class ParserTest {
                 varDeclStmt(boolType(), "r", binop(refExpr(idRef("d")), TokenKind.OR, boolLit(true)))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -789,7 +857,7 @@ public class ParserTest {
                 returnStmt(refExpr(idRef("y")))
         );
 
-        Asserter<MethodDecl> foo = method(Access.PACKAGE_PRIVATE, false, voidType(), "foo", null, fooStmts);
+        Asserter<MethodDecl> foo = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "foo", null, fooStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(foo));
     }
@@ -809,7 +877,7 @@ public class ParserTest {
                 callStmt(callRef(qRef(idRef("c"), "p"), List.of(refExpr(idRef("e")))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -822,8 +890,8 @@ public class ParserTest {
         classes(classDecls, List.of("Test"));
 
         List<Asserter<FieldDecl>> fields = List.of(
-                field(Access.PACKAGE_PRIVATE, false, arrayType(intType(), 1), "a"),
-                field(Access.PACKAGE_PRIVATE, false, arrayType(classType("Test"), 1), "t")
+                field(Access.PACKAGE_PRIVATE, false, false, arrayType(intType(), 1), "a"),
+                field(Access.PACKAGE_PRIVATE, false, false, arrayType(classType("Test"), 1), "t")
         );
 
         List<Asserter<Statement>> pStmts = List.of(
@@ -837,7 +905,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "Test", fields, List.of(p));
     }
@@ -854,7 +922,7 @@ public class ParserTest {
                 varDeclStmt(boolType(), "b", refExpr(idRef("c")))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -886,7 +954,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", params, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", params, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -906,7 +974,7 @@ public class ParserTest {
                 varDeclStmt(arrayType(classType("Test"), 1), "v", refExpr(idRef("a")))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", params, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", params, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -929,7 +997,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", params, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", params, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -950,7 +1018,7 @@ public class ParserTest {
                 callStmt(callRef(qRef(idRef("c"), "p"), List.of(intLit(2), intLit(3))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", params, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", params, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -971,7 +1039,7 @@ public class ParserTest {
                 assignStmt(qRef(idRef("a"), "v"), intLit(4))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", params, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", params, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -987,7 +1055,7 @@ public class ParserTest {
                 assignStmt(qRef(idRef("x"), "y"), refExpr(idRef("z")))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1004,7 +1072,7 @@ public class ParserTest {
                 varDeclStmt(arrayType(intType(), 1), "b", newArrayExpr(intType(), List.of(intLit(4))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1021,7 +1089,7 @@ public class ParserTest {
                         List.of(intLit(10))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1060,7 +1128,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1090,7 +1158,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1140,7 +1208,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1198,7 +1266,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1235,7 +1303,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1251,7 +1319,7 @@ public class ParserTest {
                 whileStmt(boolLit(true), blockStmt(null))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, classType("A"), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, classType("A"), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1270,7 +1338,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, classType("A"), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, classType("A"), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1282,7 +1350,7 @@ public class ParserTest {
 
         classes(classDecls, List.of("A"));
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, true, voidType(), "p", null, null);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, true, false, voidType(), "p", null, null);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1298,7 +1366,7 @@ public class ParserTest {
                 returnStmt(intLit(0))
         );
 
-        Asserter<MethodDecl> p = method(Access.PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1315,7 +1383,7 @@ public class ParserTest {
                 varDeclStmt(intType(), "y", intLit(4))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1334,7 +1402,7 @@ public class ParserTest {
                 varDeclStmt(arrayType(intType(), 1), "a", null)
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1350,7 +1418,7 @@ public class ParserTest {
                 param(arrayType(classType("A"), 1), "s")
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", params, null);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", params, null);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1366,7 +1434,7 @@ public class ParserTest {
                 param(arrayType(intType(), 1), "m")
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", params, null);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", params, null);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1382,9 +1450,49 @@ public class ParserTest {
                 param(arrayType(boolType(), 1), "m")
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", params, null);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", params, null);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
+    }
+
+    @Test
+    public void pass_methodDecls_modifiers() {
+        String file = "method_decl/pass7.java";
+        List<ClassDecl> classDecls = pass(file);
+
+        classes(classDecls, List.of("Test"));
+
+        List<Asserter<MethodDecl>> methods = List.of(
+                method(Access.PUBLIC, false, false, intType(), "get", null, null),
+                method(Access.PRIVATE, false, false, intType(), "get", null, null),
+                method(Access.PACKAGE_PRIVATE, false, false, intType(), "get", null, null),
+                method(Access.PACKAGE_PRIVATE, true, false, intType(), "get", null, null),
+                method(Access.PACKAGE_PRIVATE, false, true, intType(), "get", null, null),
+                method(Access.PACKAGE_PRIVATE, true, true, intType(), "get", null, null),
+                method(Access.PACKAGE_PRIVATE, true, true, intType(), "get", null, null),
+                method(Access.PUBLIC, true, false, intType(), "get", null, null),
+                method(Access.PUBLIC, true, false, intType(), "get", null, null),
+                method(Access.PRIVATE, true, false, intType(), "get", null, null),
+                method(Access.PRIVATE, true, false, intType(), "get", null, null),
+                method(Access.PUBLIC, false, true, intType(), "get", null, null),
+                method(Access.PUBLIC, false, true, intType(), "get", null, null),
+                method(Access.PRIVATE, false, true, intType(), "get", null, null),
+                method(Access.PRIVATE, false, true, intType(), "get", null, null),
+                method(Access.PUBLIC, true, true, intType(), "get", null, null),
+                method(Access.PUBLIC, true, true, intType(), "get", null, null),
+                method(Access.PUBLIC, true, true, intType(), "get", null, null),
+                method(Access.PUBLIC, true, true, intType(), "get", null, null),
+                method(Access.PUBLIC, true, true, intType(), "get", null, null),
+                method(Access.PUBLIC, true, true, intType(), "get", null, null),
+                method(Access.PRIVATE, true, true, intType(), "get", null, null),
+                method(Access.PRIVATE, true, true, intType(), "get", null, null),
+                method(Access.PRIVATE, true, true, intType(), "get", null, null),
+                method(Access.PRIVATE, true, true, intType(), "get", null, null),
+                method(Access.PRIVATE, true, true, intType(), "get", null, null),
+                method(Access.PRIVATE, true, true, intType(), "get", null, null)
+        );
+
+        clazz(classDecls.get(0), "Test", null, methods);
     }
 
     @Test
@@ -1398,7 +1506,7 @@ public class ParserTest {
                 varDeclStmt(classType("A"), "a", newObjectExpr("A", null))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1416,7 +1524,7 @@ public class ParserTest {
                         List.of(boolLit(false), intLit(3), floatLit(4.5f))))
         );
 
-        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -1432,7 +1540,7 @@ public class ParserTest {
                 callStmt(callRef(qRef(idRef("x"), "y"), List.of(intLit(3))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1448,7 +1556,7 @@ public class ParserTest {
                 assignStmt(ixRef(idRef("x"), List.of(intLit(2))), intLit(3))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1475,7 +1583,7 @@ public class ParserTest {
                 assignStmt(ixRef(idRef("arr"), List.of(intLit(1))), TokenKind.PLUS_ASSIGN, intLit(1))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1492,7 +1600,7 @@ public class ParserTest {
                 exprStmt(unop(TokenKind.INCREMENT, refExpr(idRef("a"))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1509,7 +1617,7 @@ public class ParserTest {
                 exprStmt(postfix(TokenKind.INCREMENT, refExpr(idRef("a"))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1530,7 +1638,7 @@ public class ParserTest {
                 exprStmt(postfix(TokenKind.INCREMENT, refExpr(ixRef(qRef(thisRef(), "a"), List.of(intLit(1))))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -1546,7 +1654,7 @@ public class ParserTest {
                 returnStmt(refExpr(thisRef()))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, classType("A"), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, classType("A"), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1562,7 +1670,7 @@ public class ParserTest {
                 varDeclStmt(classType("A"), "x", refExpr(ixRef(idRef("x"), List.of(intLit(3)))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1578,7 +1686,7 @@ public class ParserTest {
                 varDeclStmt(classType("A"), "x", refExpr(thisRef()))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1594,7 +1702,7 @@ public class ParserTest {
                 varDeclStmt(classType("A"), "x", refExpr(callRef(qRef(thisRef(), "p"), null)))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, pStmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, pStmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1623,7 +1731,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "f", params, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "f", params, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -1643,7 +1751,7 @@ public class ParserTest {
                 varDeclStmt(intType(), "z", unop(TokenKind.COMPLEMENT, unop(TokenKind.COMPLEMENT, refExpr(idRef("x")))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1671,7 +1779,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1695,7 +1803,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "foo", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "foo", null, stmts);
 
         clazz(classDecls.get(0), "T", null, List.of(p));
     }
@@ -1712,7 +1820,7 @@ public class ParserTest {
                 callStmt(callRef(qRef(idRef("other"), "foo"), List.of(intLit(4), refExpr(idRef("other")))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PUBLIC, false, voidType(), "foo", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PUBLIC, false, false, voidType(), "foo", null, stmts);
 
         clazz(classDecls.get(0), "C", null, List.of(p));
     }
@@ -1727,9 +1835,9 @@ public class ParserTest {
         clazz(classDecls.get(0), "A", null, null);
 
         List<Asserter<FieldDecl>> bFields = List.of(
-                field(Access.PRIVATE, false, arrayType(intType(), 1), "v"),
-                field(Access.PACKAGE_PRIVATE, false, classType("C"), "c"),
-                field(Access.PRIVATE, false, intType(), "x")
+                field(Access.PRIVATE, false, false, arrayType(intType(), 1), "v"),
+                field(Access.PACKAGE_PRIVATE, false, false, classType("C"), "c"),
+                field(Access.PRIVATE, false, false, intType(), "x")
         );
 
         List<Asserter<ParameterDecl>> fooParams = List.of(
@@ -1737,7 +1845,7 @@ public class ParserTest {
                 param(classType("B"), "other")
         );
 
-        Asserter<MethodDecl> foo = method(Access.PUBLIC, false, voidType(), "foo", fooParams, null);
+        Asserter<MethodDecl> foo = method(Access.PUBLIC, false, false, voidType(), "foo", fooParams, null);
 
         clazz(classDecls.get(1), "B", bFields, List.of(foo));
 
@@ -1752,11 +1860,11 @@ public class ParserTest {
                 returnStmt(newArrayExpr(intType(), List.of(intLit(20))))
         );
 
-        Asserter<MethodDecl> tryit = method(Access.PUBLIC, false, arrayType(intType(), 1), "tryit",
+        Asserter<MethodDecl> tryit = method(Access.PUBLIC, false, false, arrayType(intType(), 1), "tryit",
                 null, tryitStmts);
 
         clazz(classDecls.get(2), "C",
-                List.of(field(Access.PRIVATE, false, boolType(), "b")), List.of(tryit));
+                List.of(field(Access.PRIVATE, false, false, boolType(), "b")), List.of(tryit));
     }
 
     @Test
@@ -1779,7 +1887,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1810,7 +1918,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1845,7 +1953,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1872,7 +1980,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1910,7 +2018,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1932,7 +2040,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1962,7 +2070,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -1988,7 +2096,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -2018,7 +2126,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -2048,7 +2156,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
     }
@@ -2064,7 +2172,7 @@ public class ParserTest {
                 varDeclStmt(classType("Test"), "t", nullLit())
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(p));
     }
@@ -2080,7 +2188,7 @@ public class ParserTest {
                 varDeclStmt(intType(), "a", refExpr(ixRef(qRef(idRef("x"), "y"), List.of(intLit(4)))))
         );
 
-        Asserter<MethodDecl> p = method(Access.PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2096,7 +2204,7 @@ public class ParserTest {
                 varDeclStmt(intType(), "a", refExpr(qRef(ixRef(idRef("x"), List.of(intLit(4))), "y")))
         );
 
-        Asserter<MethodDecl> p = method(Access.PRIVATE, false, voidType(), "p", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PRIVATE, false, false, voidType(), "p", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2119,7 +2227,7 @@ public class ParserTest {
                 assignStmt(qRef(callRef(qRef(thisRef(), "x"), null), "p"), intLit(1))
         );
 
-        Asserter<MethodDecl> main = method(Access.PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -2167,7 +2275,7 @@ public class ParserTest {
                 ))
         );
 
-        Asserter<MethodDecl> main = method(Access.PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -2195,7 +2303,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> main = method(Access.PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -2250,7 +2358,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> main = method(Access.PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -2276,7 +2384,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2302,7 +2410,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2328,7 +2436,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2354,7 +2462,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2376,7 +2484,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2402,7 +2510,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2428,7 +2536,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2454,7 +2562,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2480,7 +2588,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2510,7 +2618,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2540,7 +2648,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2574,7 +2682,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2608,7 +2716,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2640,7 +2748,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, intType(), "f", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, intType(), "f", null, stmts);
 
         clazz(classDecls.get(0), "A", null, List.of(p));
     }
@@ -2686,7 +2794,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PUBLIC, false, voidType(), "foo", null, stmts);
+        Asserter<MethodDecl> p = method(Access.PUBLIC, false, false, voidType(), "foo", null, stmts);
 
         clazz(classDecls.get(0), "B", null, List.of(p));
     }
@@ -2710,7 +2818,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -2738,7 +2846,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -2755,7 +2863,7 @@ public class ParserTest {
                 continueStmt()
         );
 
-        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -2791,7 +2899,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, voidType(), "main", null, stmts);
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main", null, stmts);
 
         clazz(classDecls.get(0), "Test", null, List.of(main));
     }
@@ -2832,7 +2940,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> main = method(Access.PUBLIC, true, voidType(), "main",
+        Asserter<MethodDecl> main = method(Access.PUBLIC, true, false, voidType(), "main",
                 List.of(param(arrayType(classType("String"), 1), "args")), List.of(stmt, stmt));
 
         clazz(classDecls.get(0), "A", null, List.of(main));
@@ -2891,7 +2999,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p",
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p",
                 null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
@@ -2936,7 +3044,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "main",
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main",
                 null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
@@ -2994,7 +3102,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p",
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p",
                 null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
@@ -3033,7 +3141,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p",
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p",
                 null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
@@ -3094,7 +3202,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p",
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p",
                 null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
@@ -3125,7 +3233,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p",
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p",
                 null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
@@ -3171,7 +3279,7 @@ public class ParserTest {
                 )
         );
 
-        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, voidType(), "p",
+        Asserter<MethodDecl> p = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "p",
                 null, stmts);
 
         clazz(classDecls.get(0), "id", null, List.of(p));
@@ -3184,7 +3292,7 @@ public class ParserTest {
 
         classes(classDecls, List.of("Test"));
 
-        Asserter<MethodDecl> constructor = method(Access.PACKAGE_PRIVATE, false, voidType(), "Test", null, null);
+        Asserter<MethodDecl> constructor = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "Test", null, null);
 
         clazz(classDecls.get(0), "Test", null, List.of(constructor));
     }
@@ -3204,7 +3312,7 @@ public class ParserTest {
                 assignStmt(idRef("a"), intLit(2))
         );
 
-        Asserter<MethodDecl> constructor = method(Access.PACKAGE_PRIVATE, false, voidType(), "Test",
+        Asserter<MethodDecl> constructor = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "Test",
                 params, statements);
 
         clazz(classDecls.get(0), "Test", null, List.of(constructor));
@@ -3217,7 +3325,7 @@ public class ParserTest {
 
         classes(classDecls, List.of("Test"));
 
-        Asserter<MethodDecl> constructor = method(Access.PRIVATE, false, voidType(), "Test", null, null);
+        Asserter<MethodDecl> constructor = method(Access.PRIVATE, false, false, voidType(), "Test", null, null);
 
         clazz(classDecls.get(0), "Test", null, List.of(constructor));
     }
