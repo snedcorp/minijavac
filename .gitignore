@@ -41,4 +41,4 @@ build/
 *.class
 /Test.java
 dependency-reduced-pom.xml
-/debug.txt
+/*.txt

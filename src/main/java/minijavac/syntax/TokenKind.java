@@ -91,6 +91,8 @@ public enum TokenKind {
 
     private static final Set<TokenKind> recognizableStatementStarters;
 
+    private static final Set<TokenKind> modifiers;
+
     TokenKind() {}
 
     TokenKind(String spelling) {
@@ -129,6 +131,8 @@ public enum TokenKind {
 
         recognizableStatementStarters = Stream.of(IF, WHILE, FOR, DO, RETURN, BREAK, CONTINUE)
                 .collect(Collectors.toSet());
+
+        modifiers = Stream.of(PRIVATE, PUBLIC, STATIC, FINAL).collect(Collectors.toSet());
     }
 
     /**
@@ -185,6 +189,14 @@ public enum TokenKind {
      */
     public boolean isRecognizableStatementStarter() {
         return recognizableStatementStarters.contains(this);
+    }
+
+    /**
+     * Evaluates whether the {@link TokenKind} instance is a member modifier.
+     * <br><br>Valid kinds: {@code public, private, static, final}
+     */
+    public boolean isModifier() {
+        return modifiers.contains(this);
     }
 
     public String print() {

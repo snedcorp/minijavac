@@ -41,20 +41,22 @@ public class ASTUtils {
         }
     }
 
-    public static Asserter<FieldDecl> field(Access access, boolean isStatic, Type type, String name) {
+    public static Asserter<FieldDecl> field(Access access, boolean isStatic, boolean isFinal, Type type, String name) {
         return (FieldDecl field) -> {
             assertEquals(access, field.access);
             assertEquals(isStatic, field.isStatic);
+            assertEquals(isFinal, field.isFinal);
             type(type, field.type);
             assertEquals(name, field.id.contents);
         };
     }
 
-    public static Asserter<MethodDecl> method(Access access, boolean isStatic, Type type, String name,
+    public static Asserter<MethodDecl> method(Access access, boolean isStatic, boolean isFinal, Type type, String name,
                                               List<Asserter<ParameterDecl>> paramAsserters, List<Asserter<Statement>> stmtAsserters) {
         return (MethodDecl method) -> {
             assertEquals(access, method.access);
             assertEquals(isStatic, method.isStatic);
+            assertEquals(isFinal, method.isFinal);
             type(type, method.type);
             assertEquals(name, method.id.contents);
 
