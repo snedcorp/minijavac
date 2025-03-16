@@ -262,6 +262,11 @@ public class Enter implements Visitor<EnterTraversalState, EnterArg, Object> {
     }
 
     @Override
+    public Object visitSwitchStmt(SwitchStmt stmt, EnterTraversalState state, EnterArg arg) {
+        return null;
+    }
+
+    @Override
     public Object visitUnaryExpr(UnaryExpr expr, EnterTraversalState state, EnterArg arg) {
         expr.expr.visit(this, state, arg);
         return null;

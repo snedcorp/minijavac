@@ -328,6 +328,12 @@ public class Context implements Visitor<ContextTraversalState, ConArg, Type> {
         return null;
     }
 
+    // duplicate case label, constant expression required, incompatible types
+    @Override
+    public Type visitSwitchStmt(SwitchStmt stmt, ContextTraversalState state, ConArg arg) {
+        return null;
+    }
+
     @Override
     public Type visitUnaryExpr(UnaryExpr expr, ContextTraversalState state, ConArg arg) {
         Type exprType = expr.expr.visit(this, state, ConArg.NONE);

@@ -674,4 +674,26 @@ public class ScannerTest {
 
         assertTokens(tokens, kinds, ids, pos, isFile(file));
     }
+
+    @Test
+    public void pass_switch() {
+        String file = "pass37.java";
+        List<Token> tokens = pass(file);
+
+        List<TokenKind> kinds = Arrays.asList(CLASS, IDENTIFIER, LCBRACKET,
+                VOID, IDENTIFIER, LPAREN, RPAREN, LCBRACKET, SWITCH, LPAREN,
+                IDENTIFIER, RPAREN, LCBRACKET, CASE, NUM, COLON, DEFAULT, COLON,
+                RCBRACKET, RCBRACKET, RCBRACKET, EOF);
+        List<String> ids = List.of("id", "main", "a");
+        List<String> nums = List.of("1");
+        int[][] pos = {{1, 0}, {1, 6}, {1, 9},
+                {2, 4}, {2, 9}, {2, 13}, {2, 14}, {2, 16},
+                {3, 8}, {3, 15}, {3, 16}, {3, 17}, {3, 19},
+                {4, 12}, {4, 17}, {4, 18},
+                {5, 12}, {5, 19},
+                {6, 8}, {7, 4}, {8, 0}
+        };
+
+        assertTokens(tokens, kinds, ids, pos, isFile(file), nums, null);
+    }
 }

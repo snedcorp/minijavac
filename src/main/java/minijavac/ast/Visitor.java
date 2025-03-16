@@ -35,6 +35,7 @@ public interface Visitor<S extends TraversalState,A,R> {
     R visitBreakStmt(BreakStmt stmt, S state, A arg);
     R visitContinueStmt(ContinueStmt stmt, S state, A arg);
     R visitForStmt(ForStmt stmt, S state, A arg);
+    R visitSwitchStmt(SwitchStmt stmt, S state, A arg);
     
     // Expressions
     R visitUnaryExpr(UnaryExpr expr, S state, A arg);

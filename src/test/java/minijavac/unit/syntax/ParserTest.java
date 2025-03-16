@@ -582,6 +582,13 @@ public class ParserTest {
     }
 
     @Test
+    public void fail_switch_duplicate_default() {
+        String file = "stmt/switch/fail1.java";
+        List<CompileError> errs = fail(file, 2);
+        assertParseErr(errs.get(0), TokenKind.DEFAULT, isFile(file), 8, 12, "duplicate default label");
+    }
+
+    @Test
     public void pass_classDecls() {
         String file = "class_decl/pass1.java";
         List<ClassDecl> classDecls = pass(file);
@@ -3328,6 +3335,162 @@ public class ParserTest {
         Asserter<MethodDecl> constructor = method(Access.PRIVATE, false, false, voidType(), "Test", null, null);
 
         clazz(classDecls.get(0), "Test", null, List.of(constructor));
+    }
+
+    @Test
+    public void pass_switch_no_cases_no_default() {
+        String file = "stmt/switch/pass1.java";
+        List<ClassDecl> classDecls = pass(file);
+
+        classes(classDecls, List.of("Test"));
+
+        List<Asserter<Statement>> stmts = List.of(
+                switchStmt(refExpr(idRef("a")), null, null, null)
+        );
+
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main",
+                List.of(param(intType(), "a")), stmts);
+
+        clazz(classDecls.get(0), "Test", null, List.of(main));
+    }
+
+    @Test
+    public void pass_switch_one_case_no_body() {
+        String file = "stmt/switch/pass2.java";
+        List<ClassDecl> classDecls = pass(file);
+
+        classes(classDecls, List.of("Test"));
+
+        List<Asserter<Statement>> stmts = List.of(
+                switchStmt(refExpr(idRef("a")), List.of(intLit(1)), List.of(List.of()), null)
+        );
+
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main",
+                List.of(param(intType(), "a")), stmts);
+
+        clazz(classDecls.get(0), "Test", null, List.of(main));
+    }
+
+    @Test
+    public void pass_switch_one_case_with_body() {
+        String file = "stmt/switch/pass3.java";
+        List<ClassDecl> classDecls = pass(file);
+
+        classes(classDecls, List.of("Test"));
+
+        List<Asserter<Statement>> stmts = List.of(
+                switchStmt(
+                        refExpr(idRef("a")),
+                        List.of(
+                                intLit(1)
+                        ),
+                        List.of(
+                                List.of(
+                                        assignStmt(
+                                                idRef("a"),
+                                                intLit(2)
+                                        )
+                                )
+                        ),
+                        null
+                )
+        );
+
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main",
+                List.of(param(intType(), "a")), stmts);
+
+        clazz(classDecls.get(0), "Test", null, List.of(main));
+    }
+
+    @Test
+    public void pass_switch_one_case_with_body_default() {
+        String file = "stmt/switch/pass4.java";
+        List<ClassDecl> classDecls = pass(file);
+
+        classes(classDecls, List.of("Test"));
+
+        List<Asserter<Statement>> stmts = List.of(
+                switchStmt(
+                        refExpr(idRef("a")),
+                        List.of(
+                                intLit(1),
+                                nullExpr()
+                        ),
+                        List.of(
+                                List.of(
+                                        assignStmt(
+                                                idRef("a"),
+                                                intLit(2)
+                                        ),
+                                        breakStmt()
+                                ),
+                                List.of(
+                                        assignStmt(
+                                                idRef("a"),
+                                                intLit(3)
+                                        )
+                                )
+                        ),
+                        1
+                )
+        );
+
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main",
+                List.of(param(intType(), "a")), stmts);
+
+        clazz(classDecls.get(0), "Test", null, List.of(main));
+    }
+
+    @Test
+    public void pass_switch_cases_default_out_of_order() {
+        String file = "stmt/switch/pass5.java";
+        List<ClassDecl> classDecls = pass(file);
+
+        classes(classDecls, List.of("Test"));
+
+        List<Asserter<Statement>> stmts = List.of(
+                switchStmt(
+                        refExpr(idRef("a")),
+                        List.of(
+                                nullExpr(),
+                                intLit(10),
+                                intLit(5),
+                                intLit(1)
+                        ),
+                        List.of(
+                                List.of(
+                                        assignStmt(
+                                                idRef("a"),
+                                                intLit(3)
+                                        )
+                                ),
+                                List.of(
+                                        assignStmt(
+                                                idRef("a"),
+                                                intLit(2)
+                                        )
+                                ),
+                                List.of(
+                                        assignStmt(
+                                                idRef("a"),
+                                                intLit(4)
+                                        )
+                                ),
+                                List.of(
+                                        assignStmt(
+                                                idRef("a"),
+                                                intLit(5)
+                                        )
+                                )
+                        ),
+                        0
+                )
+        );
+
+        Asserter<MethodDecl> main = method(Access.PACKAGE_PRIVATE, false, false, voidType(), "main",
+                List.of(param(intType(), "a")), stmts);
+
+        clazz(classDecls.get(0), "Test", null, List.of(main));
     }
 
 }

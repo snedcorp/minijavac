@@ -76,8 +76,9 @@ public enum TokenKind {
     CONTINUE("continue"),
     FINAL("final"),
     DO("do"),
-    PACKAGE("package"),
-    IMPORT("import"),
+    SWITCH("switch"),
+    CASE("case"),
+    DEFAULT("default"),
     NUM, FLOAT_NUM, IDENTIFIER, COMMENT, EOF;
 
     private String spelling;

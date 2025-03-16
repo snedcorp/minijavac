@@ -7,10 +7,7 @@ import minijavac.syntax.err.ParseError;
 import minijavac.syntax.err.ExpectedParseError;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Recursive descent parser that performs syntactic analysis on scanned tokens to construct an {@link AST} of the
@@ -226,6 +223,9 @@ public class Parser {
                 case FOR -> {
                     return parseForStatement();
                 }
+                case SWITCH -> {
+                    return parseSwitchStatement();
+                }
                 case BREAK -> {
                     accept();
                     accept(TokenKind.SEMICOLON);
@@ -321,6 +321,52 @@ public class Parser {
         accept(TokenKind.RPAREN);
         Statement statement = parseStatement();
         return new ForStmt(initStmt, cond, updateStmt, statement, pos);
+    }
+
+    private SwitchStmt parseSwitchStatement() throws CompileError, IOException {
+        Position pos = token.pos;
+        accept();
+        accept(TokenKind.LPAREN);
+        Expression expr = parseExpression();
+        accept(TokenKind.RPAREN);
+        accept(TokenKind.LCBRACKET);
+
+        List<Expression> caseLabels = new ArrayList<>();
+        List<List<Statement>> caseBodies = new ArrayList<>();
+        Integer defaultIx = null;
+
+        while (token.kind == TokenKind.CASE || token.kind == TokenKind.DEFAULT) {
+            Expression labelExpr = null;
+            boolean isDefault = false;
+
+            if (token.kind == TokenKind.DEFAULT) {
+                if (defaultIx != null) throw err("duplicate default label");
+                accept();
+                isDefault = true;
+            } else {
+                accept();
+                labelExpr = parseExpression();
+            }
+
+            accept(TokenKind.COLON);
+
+            List<Statement> statementList = new ArrayList<>();
+            while (token.kind != TokenKind.CASE && token.kind != TokenKind.DEFAULT && token.kind != TokenKind.RCBRACKET) {
+                Statement statement = parseStatement();
+                if (statement != null) {
+                    statementList.add(statement);
+                }
+            }
+
+            if (isDefault) {
+                defaultIx = caseBodies.size();
+            }
+            caseLabels.add(labelExpr);
+            caseBodies.add(statementList);
+        }
+        accept(TokenKind.RCBRACKET);
+
+        return new SwitchStmt(expr, caseLabels, caseBodies, defaultIx, pos);
     }
 
     private ReturnStmt parseReturnStatement() throws CompileError, IOException {

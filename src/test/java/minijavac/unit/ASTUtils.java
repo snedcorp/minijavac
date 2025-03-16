@@ -4,7 +4,10 @@ import minijavac.ast.*;
 import minijavac.syntax.Token;
 import minijavac.syntax.TokenKind;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -260,6 +263,49 @@ public class ASTUtils {
         };
     }
 
+    public static Asserter<Statement> switchStmt(Asserter<Expression> expressionAsserter,
+                                                 List<Asserter<Expression>> caseLabelsAsserters,
+                                                 List<List<Asserter<Statement>>> caseBodiesAsserters,
+                                                 Integer defaultIx) {
+        return (Statement statement) -> {
+            assertTrue(statement instanceof SwitchStmt);
+            SwitchStmt switchStmt = (SwitchStmt) statement;
+            expressionAsserter.assertIt(switchStmt.expr);
+
+            if (caseLabelsAsserters == null) {
+                assertEquals(0, switchStmt.caseLabels.size());
+                assertNull(caseBodiesAsserters);
+            } else {
+                List<Expression> labels = switchStmt.caseLabels;
+                List<List<Statement>> bodies = switchStmt.caseBodies;
+
+                assertEquals(caseLabelsAsserters.size(), labels.size());
+                assertEquals(caseBodiesAsserters.size(), bodies.size());
+
+                Iterator<Expression> labelsIter = labels.iterator();
+                Iterator<List<Statement>> bodiesIter = bodies.iterator();
+                Iterator<Asserter<Expression>> labelAssertersIter = caseLabelsAsserters.iterator();
+                Iterator<List<Asserter<Statement>>> bodyAssertersIter = caseBodiesAsserters.iterator();
+
+                while (labelsIter.hasNext()) {
+                    labelAssertersIter.next().assertIt(labelsIter.next());
+                    List<Statement> body = bodiesIter.next();
+                    List<Asserter<Statement>> bodyAsserters = bodyAssertersIter.next();
+                    assertEquals(bodyAsserters.size(), body.size());
+                    for (int i=0; i<body.size(); i++) {
+                        bodyAsserters.get(i).assertIt(body.get(i));
+                    }
+                }
+            }
+
+            if (defaultIx == null) {
+                assertNull(switchStmt.defaultIx);
+            } else {
+                assertEquals(defaultIx, switchStmt.defaultIx);
+            }
+        };
+    }
+
     public static Asserter<Reference> idRef(String id) {
         return (Reference ref) -> {
             assertTrue(ref instanceof IdRef);
@@ -371,6 +417,10 @@ public class ASTUtils {
                 expAsserters.get(i).assertIt(initExpr.exprList.get(i));
             }
         };
+    }
+
+    public static Asserter<Expression> nullExpr() {
+        return (Expression expr) -> assertNull(expr);
     }
 
     public static Asserter<Expression> intLit(int lit) {

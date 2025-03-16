@@ -432,6 +432,11 @@ public class Generator implements Visitor<GenTraversalState, GenArg, Object> {
     }
 
     @Override
+    public Object visitSwitchStmt(SwitchStmt stmt, GenTraversalState state, GenArg arg) {
+        return null;
+    }
+
+    @Override
     public Object visitUnaryExpr(UnaryExpr expr, GenTraversalState state, GenArg arg) {
         CodeAttribute code = state.getCode();
         TokenKind op = expr.operator.kind;
